@@ -102,6 +102,8 @@ uint64_t cpu_features_get_time_usec()
 
    return count.QuadPart * 1000000 / freq.QuadPart;
 }
+#elif defined(PS2)
+uint64_t cpu_features_get_time_usec();
 #else
 uint64_t cpu_features_get_time_usec()
 {
