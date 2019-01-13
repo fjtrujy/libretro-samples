@@ -15,9 +15,15 @@ static int groupsizes[]={5,2,1,1};
 
 #if PIXFMT==0
 #define pixel_t uint16_t
+#if defined(ABGR1555)
+#define p_blu 0x7C00
+#define p_grn 0x03E0
+#define p_red 0x001F
+#else
 #define p_red 0x7C00
 #define p_grn 0x03E0
 #define p_blu 0x001F
+#endif
 #define p_x 0
 #define p_dark 0x3DEF
 #endif

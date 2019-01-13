@@ -10,6 +10,15 @@ cxx     := $(CXX)
 soext   := so
 objdir  := obj/
 
+if ifeq ($(platform), ps2)
+   TARGET := $(TARGET_NAME)_ps2.a
+   cc = ee-gcc
+   cxx = ee-g++
+   CFLAGS += -Wl,-q -Wall -G0 -fsingle-precision-constant
+   CFLAGS += -Ips2/
+	STATIC_LINKING = 1
+endif
+
 ifneq ($(findstring $(config),win32),)
 	soext := dll
 endif
