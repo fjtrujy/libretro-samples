@@ -334,7 +334,7 @@ static void render_checkered(void)
       stride = 320;
    }
 
-   uint32_t color_r = 0xff << 16;
+   uint32_t color_r = 0xff;
    uint32_t color_g = 0xff <<  8;
 
    uint32_t *line = buf;
@@ -350,7 +350,7 @@ static void render_checkered(void)
 
    for (unsigned y = mouse_rel_y - 5; y <= mouse_rel_y + 5; y++)
       for (unsigned x = mouse_rel_x - 5; x <= mouse_rel_x + 5; x++)
-         buf[y * stride + x] = 0xff;
+         buf[y * stride + x] = 0xff << 16;
 
    video_cb(buf, 320, 240, stride << 2);
 }
