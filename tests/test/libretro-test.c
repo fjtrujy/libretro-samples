@@ -8,6 +8,10 @@
 
 #include "libretro.h"
 
+#if defined(RENDER_GSKIT_PS2)
+#include "libretro_gskit_ps2.h"
+#endif
+
 static uint32_t *frame_buf;
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
@@ -334,7 +338,7 @@ static void render_checkered(void)
       stride = 320;
    }
 
-#if defined (ABGR4444)
+#if defined(ABGR4444)
    uint32_t color_b = 0xff <<  16;
    uint32_t color_g = 0xff <<  8;
    uint32_t color_r = 0xff;
@@ -343,6 +347,63 @@ static void render_checkered(void)
    uint32_t color_g = 0xff <<  8;
    uint32_t color_b = 0xff;
 #endif
+
+#if defined(RENDER_GSKIT_PS2)
+
+   RETRO_HW_RENDER_INTEFACE_GSKIT_PS2 *ps2 = NULL;
+   uint8_t *line;
+
+   if (!environ_cb(RETRO_ENVIRONMENT_GET_HW_RENDER_INTERFACE, (void **)&ps2) || !ps2) {
+		printf("Failed to get HW rendering interface!\n");
+		return;
+	}
+
+	if (ps2->interface_version != RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION) {
+		printf("HW render interface mismatch, expected %u, got %u!\n", 
+               RETRO_HW_RENDER_INTERFACE_GSKIT_PS2_VERSION, ps2->interface_version);
+		return;
+	}
+
+   if (!ps2->coreTexture->Clut) {
+      /* If it is empty we need to create it */
+      size_t mem_size, clut_size;
+      uint32_t *palette;
+
+      ps2->coreTexture->Width = fb.width;
+      ps2->coreTexture->Height = fb.height;
+      ps2->coreTexture->PSM = GS_PSM_T8;
+      ps2->coreTexture->ClutPSM = GS_PSM_CT32;
+      ps2->coreTexture->TBW = 4;
+      
+      mem_size = gsKit_texture_size_ee(ps2->coreTexture->Width, ps2->coreTexture->Height, ps2->coreTexture->PSM);
+      clut_size = gsKit_texture_size_ee(16, 16, ps2->coreTexture->ClutPSM); /* 16 x 16 = 256 colours */
+      ps2->coreTexture->Mem = memalign(128, mem_size);
+      ps2->coreTexture->Clut = memalign(128, clut_size);
+
+      /* Define the color palette */
+      palette =  ps2->coreTexture->Clut;
+      palette[0] = color_r;
+      palette[1] = color_g;
+      palette[2] = color_b;
+   }
+
+   line = ps2->coreTexture->Mem;
+   for (unsigned y = 0; y < 240; y++, line += stride)
+   {
+      unsigned index_y = ((y - y_coord) >> 4) & 1;
+      for (unsigned x = 0; x < 320; x++)
+      {
+         unsigned index_x = ((x - x_coord) >> 4) & 1;
+         line[x] = (index_y ^ index_x) ? 0 : 1;
+      }
+   }
+
+   for (unsigned y = mouse_rel_y - 5; y <= mouse_rel_y + 5; y++)
+      for (unsigned x = mouse_rel_x - 5; x <= mouse_rel_x + 5; x++)
+         line[y * stride + x] = 2;
+
+   buf = RETRO_HW_FRAME_BUFFER_VALID;
+#else
 
    uint32_t *line = buf;
    for (unsigned y = 0; y < 240; y++, line += stride)
@@ -359,6 +420,8 @@ static void render_checkered(void)
       for (unsigned x = mouse_rel_x - 5; x <= mouse_rel_x + 5; x++)
          buf[y * stride + x] = color_b;
 
+#endif
+   
    video_cb(buf, 320, 240, stride << 2);
 }
 
