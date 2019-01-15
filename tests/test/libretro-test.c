@@ -364,7 +364,7 @@ static void render_checkered(void)
 		return;
 	}
 
-   if (!ps2->coreTexture->Clut) {
+   if (ps2->clearTexture || !ps2->coreTexture->Clut || !ps2->coreTexture->Mem ) {
       /* If it is empty we need to create it */
       size_t mem_size, clut_size;
       uint32_t *palette;
@@ -373,10 +373,11 @@ static void render_checkered(void)
       ps2->coreTexture->Height = fb.height;
       ps2->coreTexture->PSM = GS_PSM_T8;
       ps2->coreTexture->ClutPSM = GS_PSM_CT32;
-      ps2->coreTexture->TBW = 4;
       
       mem_size = gsKit_texture_size_ee(ps2->coreTexture->Width, ps2->coreTexture->Height, ps2->coreTexture->PSM);
       clut_size = gsKit_texture_size_ee(16, 16, ps2->coreTexture->ClutPSM); /* 16 x 16 = 256 colours */
+      free(ps2->coreTexture->Mem);
+      free(ps2->coreTexture->Clut);
       ps2->coreTexture->Mem = memalign(128, mem_size);
       ps2->coreTexture->Clut = memalign(128, clut_size);
 
