@@ -14,14 +14,14 @@ static bool use_audio_cb;
 static float last_aspect;
 static float last_sample_rate;
 
-static void fallback_log(enum retro_log_level level, const char *fmt, ...)
-{
-   (void)level;
-   va_list va;
-   va_start(va, fmt);
-   vfprintf(stderr, fmt, va);
-   va_end(va);
-}
+// static void fallback_log(enum retro_log_level level, const char *fmt, ...)
+// {
+//    (void)level;
+//    va_list va;
+//    va_start(va, fmt);
+//    vfprintf(stderr, fmt, va);
+//    va_end(va);
+// }
 
 void retro_init(void)
 {
@@ -47,9 +47,9 @@ void retro_set_controller_port_device(unsigned port, unsigned device)
 void retro_get_system_info(struct retro_system_info *info)
 {
    memset(info, 0, sizeof(*info));
-   info->library_name     = "TestCore";
-   info->library_version  = "v1";
-   info->need_fullpath    = false;
+   info->library_name = "TestCore";
+   info->library_version = "v1";
+   info->need_fullpath = false;
    info->valid_extensions = NULL; // Anything is fine, we don't care.
 }
 
@@ -63,7 +63,7 @@ static retro_input_state_t input_state_cb;
 void retro_get_system_av_info(struct retro_system_av_info *info)
 {
    float aspect = 4.0f / 3.0f;
-   struct retro_variable var = { .key = "test_aspect" };
+   struct retro_variable var = {.key = "test_aspect"};
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
    {
       if (!strcmp(var.value, "4:3"))
@@ -77,17 +77,17 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
       sampling_rate = strtof(var.value, NULL);
 
-   info->timing = (struct retro_system_timing) {
-      .fps = 60.0,
-      .sample_rate = sampling_rate,
+   info->timing = (struct retro_system_timing){
+       .fps = 60.0,
+       .sample_rate = sampling_rate,
    };
 
-   info->geometry = (struct retro_game_geometry) {
-      .base_width   = 320,
-      .base_height  = 240,
-      .max_width    = 320,
-      .max_height   = 240,
-      .aspect_ratio = aspect,
+   info->geometry = (struct retro_game_geometry){
+       .base_width = 320,
+       .base_height = 240,
+       .max_width = 320,
+       .max_height = 240,
+       .aspect_ratio = aspect,
    };
 
    last_aspect = aspect;
@@ -101,51 +101,73 @@ void retro_set_environment(retro_environment_t cb)
    environ_cb = cb;
 
    static const struct retro_variable vars[] = {
-      { "test_aspect", "Aspect Ratio; 4:3|16:9" },
-      { "test_samplerate", "Sample Rate; 30000|20000" },
-      { "test_opt0", "Test option #0; false|true" },
-      { "test_opt1", "Test option #1; 0" },
-      { "test_opt2", "Test option #2; 0|1|foo|3" },
-      { NULL, NULL },
+       {"test_aspect", "Aspect Ratio; 4:3|16:9"},
+       {"test_samplerate", "Sample Rate; 30000|20000"},
+       {"test_opt0", "Test option #0; false|true"},
+       {"test_opt1", "Test option #1; 0"},
+       {"test_opt2", "Test option #2; 0|1|foo|3"},
+       {NULL, NULL},
    };
 
-   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
+   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void *)vars);
 
    bool no_content = true;
    cb(RETRO_ENVIRONMENT_SET_SUPPORT_NO_GAME, &no_content);
 
    if (cb(RETRO_ENVIRONMENT_GET_LOG_INTERFACE, &logging))
       log_cb = logging.log;
-   else
-      log_cb = fallback_log;
+   // else
+   //    log_cb = fallback_log;
 
-   static const struct retro_subsystem_memory_info mem1[] = {{ "ram1", 0x400 }, { "ram2", 0x401 }};
-   static const struct retro_subsystem_memory_info mem2[] = {{ "ram3", 0x402 }, { "ram4", 0x403 }};
+   static const struct retro_subsystem_memory_info mem1[] = {{"ram1", 0x400}, {"ram2", 0x401}};
+   static const struct retro_subsystem_memory_info mem2[] = {{"ram3", 0x402}, {"ram4", 0x403}};
 
    static const struct retro_subsystem_rom_info content[] = {
-      { "Test Rom #1", "bin", false, false, true, mem1, 2, },
-      { "Test Rom #2", "bin", false, false, true, mem2, 2, },
+       {
+           "Test Rom #1",
+           "bin",
+           false,
+           false,
+           true,
+           mem1,
+           2,
+       },
+       {
+           "Test Rom #2",
+           "bin",
+           false,
+           false,
+           true,
+           mem2,
+           2,
+       },
    };
 
    static const struct retro_subsystem_info types[] = {
-      { "Foo", "foo", content, 2, 0x200, },
-      { NULL },
+       {
+           "Foo",
+           "foo",
+           content,
+           2,
+           0x200,
+       },
+       {NULL},
    };
 
-   cb(RETRO_ENVIRONMENT_SET_SUBSYSTEM_INFO, (void*)types);
+   cb(RETRO_ENVIRONMENT_SET_SUBSYSTEM_INFO, (void *)types);
 
    static const struct retro_controller_description controllers[] = {
-      { "Dummy Controller #1", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0) },
-      { "Dummy Controller #2", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1) },
-      { "Augmented Joypad", RETRO_DEVICE_JOYPAD }, // Test overriding generic description in UI.
+       {"Dummy Controller #1", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 0)},
+       {"Dummy Controller #2", RETRO_DEVICE_SUBCLASS(RETRO_DEVICE_JOYPAD, 1)},
+       {"Augmented Joypad", RETRO_DEVICE_JOYPAD}, // Test overriding generic description in UI.
    };
 
    static const struct retro_controller_info ports[] = {
-      { controllers, 3 },
-      { NULL, 0 },
+       {controllers, 3},
+       {NULL, 0},
    };
 
-   cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void*)ports);
+   cb(RETRO_ENVIRONMENT_SET_CONTROLLER_INFO, (void *)ports);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
@@ -208,10 +230,10 @@ static void update_input(void)
 
    int16_t mouse_x = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_X);
    int16_t mouse_y = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_Y);
-   bool mouse_l    = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT);
-   bool mouse_r    = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_RIGHT);
+   bool mouse_l = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_LEFT);
+   bool mouse_r = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_RIGHT);
    bool mouse_down = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_WHEELDOWN);
-   bool mouse_up   = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_WHEELUP);
+   bool mouse_up = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_WHEELUP);
    bool mouse_middle = input_state_cb(0, RETRO_DEVICE_MOUSE, 0, RETRO_DEVICE_ID_MOUSE_MIDDLE);
    if (mouse_x)
       log_cb(RETRO_LOG_INFO, "Mouse X: %d\n", mouse_x);
@@ -262,11 +284,11 @@ static void update_input(void)
       bool start = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START);
       bool select = input_state_cb(0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT);
       if (old_start != start)
-         log_cb(RETRO_LOG_INFO, "Strong rumble: %s.\n", start ? "ON": "OFF");
+         log_cb(RETRO_LOG_INFO, "Strong rumble: %s.\n", start ? "ON" : "OFF");
       rumble.set_rumble_state(0, RETRO_RUMBLE_STRONG, start * strength_strong);
 
       if (old_select != select)
-         log_cb(RETRO_LOG_INFO, "Weak rumble: %s.\n", select ? "ON": "OFF");
+         log_cb(RETRO_LOG_INFO, "Weak rumble: %s.\n", select ? "ON" : "OFF");
       rumble.set_rumble_state(0, RETRO_RUMBLE_WEAK, select * strength_weak);
 
       old_start = start;
@@ -295,7 +317,7 @@ static void render_checkered(void)
    }
 
    uint32_t color_r = 0xff << 16;
-   uint32_t color_g = 0xff <<  8;
+   uint32_t color_g = 0xff << 8;
 
    uint32_t *line = buf;
    for (unsigned y = 0; y < 240; y++, line += stride)
@@ -378,21 +400,20 @@ void retro_run(void)
 }
 
 static void keyboard_cb(bool down, unsigned keycode,
-      uint32_t character, uint16_t mod)
+                        uint32_t character, uint16_t mod)
 {
    log_cb(RETRO_LOG_INFO, "Down: %s, Code: %d, Char: %u, Mod: %u.\n",
-         down ? "yes" : "no", keycode, character, mod);
+          down ? "yes" : "no", keycode, character, mod);
 }
-
 
 bool retro_load_game(const struct retro_game_info *info)
 {
    struct retro_input_descriptor desc[] = {
-      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "Left" },
-      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "Up" },
-      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN,  "Down" },
-      { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right" },
-      { 0 },
+       {0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT, "Left"},
+       {0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP, "Up"},
+       {0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_DOWN, "Down"},
+       {0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_RIGHT, "Right"},
+       {0},
    };
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
@@ -404,14 +425,14 @@ bool retro_load_game(const struct retro_game_info *info)
       return false;
    }
 
-   struct retro_keyboard_callback cb = { keyboard_cb };
+   struct retro_keyboard_callback cb = {keyboard_cb};
    environ_cb(RETRO_ENVIRONMENT_SET_KEYBOARD_CALLBACK, &cb);
    if (environ_cb(RETRO_ENVIRONMENT_GET_RUMBLE_INTERFACE, &rumble))
       log_cb(RETRO_LOG_INFO, "Rumble environment supported.\n");
    else
       log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
 
-   struct retro_audio_callback audio_cb = { audio_callback, audio_set_state };
+   struct retro_audio_callback audio_cb = {audio_callback, audio_set_state};
    use_audio_cb = environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_CALLBACK, &audio_cb);
 
    check_variables();
@@ -480,7 +501,8 @@ size_t retro_get_memory_size(unsigned id)
 }
 
 void retro_cheat_reset(void)
-{}
+{
+}
 
 void retro_cheat_set(unsigned index, bool enabled, const char *code)
 {
@@ -488,4 +510,3 @@ void retro_cheat_set(unsigned index, bool enabled, const char *code)
    (void)enabled;
    (void)code;
 }
-

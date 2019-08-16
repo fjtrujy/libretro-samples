@@ -98,6 +98,13 @@ else ifeq ($(platform), ps2)
    CFLAGS += -Wl,-q -Wall -G0 -fsingle-precision-constant
    CFLAGS += -Ips2/
 	STATIC_LINKING = 1
+else ifeq ($(platform), ps2-gcc9)
+   TARGET := $(TARGET_NAME)_ps2.a
+   CC = mips64r5900el-ps2-elf-gcc
+   AR = mips64r5900el-ps2-elf-ar
+   CFLAGS += -Wl,-q -Wall -G0 -fsingle-precision-constant
+   # CFLAGS += -Ips2/
+	STATIC_LINKING = 1
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_vita.a
    CC = arm-vita-eabi-gcc
@@ -119,7 +126,7 @@ else
 endif
 
 OBJECTS := libretro-test.o
-CFLAGS += -I../../libretro-common/include -Wall -pedantic $(fpic)
+# CFLAGS += -I../../libretro-common/include -Wall -pedantic $(fpic)
 
 ifneq (,$(findstring qnx,$(platform)))
 CFLAGS += -Wc,-std=c99
