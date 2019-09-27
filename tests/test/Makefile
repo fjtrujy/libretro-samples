@@ -99,8 +99,7 @@ else ifeq ($(platform), ps2)
    TARGET := $(TARGET_NAME)_ps2.a
    CC = ee-gcc
    AR = ee-ar
-   CFLAGS += -Wl,-q -Wall -G0 -fsingle-precision-constant
-   CFLAGS += -Ips2/
+   CFLAGS += -fsingle-precision-constant
 	STATIC_LINKING = 1
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_vita.a
