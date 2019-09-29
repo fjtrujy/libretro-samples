@@ -89,9 +89,6 @@ static INLINE void retro_sleep(unsigned msec)
    sys_timer_usleep(1000 * msec);
 #elif defined(PSP) || defined(VITA)
    sceKernelDelayThread(1000 * msec);
-#elif defined(PS2)
-   /*RetroArch will require SDL library */
-   SDL_Delay(msec);
 #elif defined(_3DS)
    svcSleepThread(1000000 * (s64)msec);
 #elif defined(_WIN32)
