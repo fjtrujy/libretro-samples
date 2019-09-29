@@ -395,7 +395,7 @@ static void render_checkered(void)
       for (unsigned x = 0; x < 320; x++)
       {
          unsigned index_x = ((x - x_coord) >> 4) & 1;
-         line[x] = (index_y ^ index_x) ? 0 : 1;
+         line[x] = (index_y ^ index_x) ? 0 : 2;
       }
    }
 
