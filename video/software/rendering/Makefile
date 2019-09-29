@@ -97,6 +97,12 @@ else ifeq ($(platform), vita)
    AR = arm-vita-eabi-ar
    CFLAGS += -Wl,-q -Wall -O3
 	STATIC_LINKING = 1
+else ifeq ($(platform), ps2)
+   TARGET := $(TARGET_NAME)_ps2.a
+   CC = ee-gcc
+   AR = ee-ar
+   CFLAGS += -Wl,-q -Wall -O3
+	STATIC_LINKING = 1
 else
    CC = gcc
    TARGET := $(TARGET_NAME)_libretro.dll

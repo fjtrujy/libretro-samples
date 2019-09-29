@@ -10,12 +10,11 @@ cxx     := $(CXX)
 soext   := so
 objdir  := obj/
 
-if ifeq ($(platform), ps2)
+ifeq ($(platform), ps2)
    TARGET := $(TARGET_NAME)_ps2.a
    cc = ee-gcc
    cxx = ee-g++
-   CFLAGS += -Wl,-q -Wall -G0 -fsingle-precision-constant
-   CFLAGS += -Ips2/
+   CFLAGS += -Wall -fsingle-precision-constant
 	STATIC_LINKING = 1
 endif
 
