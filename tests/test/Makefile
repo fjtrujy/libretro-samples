@@ -106,7 +106,7 @@ else ifeq ($(platform), psp1)
    TARGET := $(TARGET_NAME)_psp1.a
    CC = psp-gcc
    AR = psp-ar
-   CFLAGS += -Wl,-q -Wall -O3
+   CFLAGS += -Wl,-q -Wall -O3 -DPIXEL_FORMAT_16BITS
 	STATIC_LINKING = 1
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_vita.a

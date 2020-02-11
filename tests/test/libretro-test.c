@@ -12,10 +12,16 @@
 #include "libretro_gskit_ps2.h"
 #endif
 
+#if PIXEL_FORMAT_16BITS
+typedef uint16_t pixel_fmt_t;
+#else
+typedef uint32_t pixel_fmt_t;
+#endif
+
 #define BUFFER_WIDTH 320
 #define BUFFER_HEIGHT 240
 
-static uint32_t *frame_buf;
+static pixel_fmt_t *frame_buf;
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
 static bool use_audio_cb;
@@ -36,7 +42,7 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void retro_init(void)
 {
-   frame_buf = calloc(BUFFER_WIDTH * BUFFER_HEIGHT, sizeof(uint32_t));
+   frame_buf = calloc(BUFFER_WIDTH * BUFFER_HEIGHT, sizeof(pixel_fmt_t));
 }
 
 void retro_deinit(void)
@@ -324,8 +330,9 @@ static void update_input(void)
 static void render_checkered(void)
 {
    /* Try rendering straight into VRAM if we can. */
-   uint32_t *buf = NULL;
+   pixel_fmt_t *buf = NULL;
    unsigned stride = 0;
+   unsigned pitch = 0;
    struct retro_framebuffer fb = {0};
    fb.width = BUFFER_WIDTH;
    fb.height = BUFFER_HEIGHT;
@@ -334,21 +341,29 @@ static void render_checkered(void)
    {
       buf = fb.data;
       stride = fb.pitch >> 2;
+      pitch = BUFFER_WIDTH << 2;
    }
    else
    {
       buf = frame_buf;
       stride = BUFFER_WIDTH;
+      pitch = BUFFER_WIDTH << 1;
    }
 
+#if PIXEL_FORMAT_16BITS
 #if defined(ABGR4444)
-   uint32_t color_b = 0xff <<  16;
-   uint32_t color_g = 0xff <<  8;
-   uint32_t color_r = 0xff;
+   pixel_fmt_t color_b = 0xff <<  16;
+   pixel_fmt_t color_g = 0xff <<  8;
+   pixel_fmt_t color_r = 0xff;
 #else
-   uint32_t color_r = 0xff <<  16;
-   uint32_t color_g = 0xff <<  8;
-   uint32_t color_b = 0xff;
+   pixel_fmt_t color_r = 0x1f <<  11;
+   pixel_fmt_t color_g = 0x3f <<  5;
+   pixel_fmt_t color_b = 0x1f;
+#endif
+#else
+   pixel_fmt_t color_r = 0xff <<  16;
+   pixel_fmt_t color_g = 0xff <<  8;
+   pixel_fmt_t color_b = 0xff;
 #endif
 
 #if defined(RENDER_GSKIT_PS2)
@@ -370,7 +385,7 @@ static void render_checkered(void)
    if (ps2->clearTexture || !ps2->coreTexture->Clut || !ps2->coreTexture->Mem ) {
       /* If it is empty we need to create it */
       size_t mem_size, clut_size;
-      uint32_t *palette;
+      pixel_fmt_t *palette;
 
       ps2->coreTexture->Width = fb.width;
       ps2->coreTexture->Height = fb.height;
@@ -409,7 +424,7 @@ static void render_checkered(void)
    buf = RETRO_HW_FRAME_BUFFER_VALID;
 #else
 
-   uint32_t *line = buf;
+   pixel_fmt_t *line = buf;
    for (unsigned y = 0; y < BUFFER_HEIGHT; y++, line += stride)
    {
       unsigned index_y = ((y - y_coord) >> 4) & 1;
@@ -426,7 +441,7 @@ static void render_checkered(void)
 
 #endif
    
-   video_cb(buf, BUFFER_WIDTH, BUFFER_HEIGHT, stride << 2);
+   video_cb(buf, BUFFER_WIDTH, BUFFER_HEIGHT, pitch);
 }
 
 static void check_variables(void)
@@ -529,10 +544,15 @@ bool retro_load_game(const struct retro_game_info *info)
 
    environ_cb(RETRO_ENVIRONMENT_SET_INPUT_DESCRIPTORS, desc);
 
+#if PIXEL_FORMAT_16BITS
+   enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_RGB565;
+#else
    enum retro_pixel_format fmt = RETRO_PIXEL_FORMAT_XRGB8888;
+#endif
+   
    if (!environ_cb(RETRO_ENVIRONMENT_SET_PIXEL_FORMAT, &fmt))
    {
-      log_cb(RETRO_LOG_INFO, "XRGB8888 is not supported.\n");
+      log_cb(RETRO_LOG_INFO, "Pixel format is not supported.\n");
       return false;
    }
 
