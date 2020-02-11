@@ -99,8 +99,14 @@ else ifeq ($(platform), ps2)
    TARGET := $(TARGET_NAME)_ps2.a
    CC = ee-gcc
    AR = ee-ar
-   CFLAGS += -Wall -DPS2 -DABGR4444 -DRENDER_GSKIT_PS2 -fsingle-precision-constant
+   CFLAGS += -Wall -G0 -DPS2 -DABGR4444 -DRENDER_GSKIT_PS2 -fsingle-precision-constant
    CFLAGS += -I$(PS2SDK)/ee/include -I$(PS2SDK)/common/include -I$(PS2DEV)/gsKit/include
+	STATIC_LINKING = 1
+else ifeq ($(platform), psp1)
+   TARGET := $(TARGET_NAME)_psp1.a
+   CC = psp-gcc
+   AR = psp-ar
+   CFLAGS += -Wl,-q -Wall -O3
 	STATIC_LINKING = 1
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_vita.a

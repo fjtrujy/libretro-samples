@@ -12,6 +12,9 @@
 #include "libretro_gskit_ps2.h"
 #endif
 
+#define BUFFER_WIDTH 320
+#define BUFFER_HEIGHT 240
+
 static uint32_t *frame_buf;
 static struct retro_log_callback logging;
 static retro_log_printf_t log_cb;
@@ -33,7 +36,7 @@ static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 
 void retro_init(void)
 {
-   frame_buf = calloc(320 * 240, sizeof(uint32_t));
+   frame_buf = calloc(BUFFER_WIDTH * BUFFER_HEIGHT, sizeof(uint32_t));
 }
 
 void retro_deinit(void)
@@ -91,11 +94,11 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
    };
 
    info->geometry = (struct retro_game_geometry) {
-      .base_width   = 320,
-      .base_height  = 240,
-      .max_width    = 320,
-      .max_height   = 240,
-      .aspect_ratio = aspect,
+      .base_width   = BUFFER_WIDTH,
+      .base_height  = BUFFER_HEIGHT,
+      .max_width    = BUFFER_WIDTH,
+      .max_height   = BUFFER_HEIGHT,
+      .aspect_ratio = BUFFER_WIDTH/BUFFER_HEIGHT,
    };
 
    last_aspect = aspect;
@@ -225,8 +228,8 @@ static void update_input(void)
 
    if (analog_mouse)
    {
-      mouse_x = (320.0f / 32767.0f) * input_state_cb(0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X);
-      mouse_y = (240.0f / 32767.0f) * input_state_cb(0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y);
+      mouse_x = (((float)BUFFER_WIDTH) / 32767.0f) * input_state_cb(0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X);
+      mouse_y = (((float)BUFFER_HEIGHT) / 32767.0f) * input_state_cb(0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y);
 
       if (analog_mouse_relative)
       {
@@ -238,8 +241,8 @@ static void update_input(void)
          mouse_x /= 2;
          mouse_y /= 2;
 
-         mouse_x += 320 / 2;
-         mouse_y += 240 / 2;
+         mouse_x += BUFFER_WIDTH / 2;
+         mouse_y += BUFFER_HEIGHT / 2;
       }
    }
    else
@@ -324,8 +327,8 @@ static void render_checkered(void)
    uint32_t *buf = NULL;
    unsigned stride = 0;
    struct retro_framebuffer fb = {0};
-   fb.width = 320;
-   fb.height = 240;
+   fb.width = BUFFER_WIDTH;
+   fb.height = BUFFER_HEIGHT;
    fb.access_flags = RETRO_MEMORY_ACCESS_WRITE;
    if (environ_cb(RETRO_ENVIRONMENT_GET_CURRENT_SOFTWARE_FRAMEBUFFER, &fb) && fb.format == RETRO_PIXEL_FORMAT_XRGB8888)
    {
@@ -335,7 +338,7 @@ static void render_checkered(void)
    else
    {
       buf = frame_buf;
-      stride = 320;
+      stride = BUFFER_WIDTH;
    }
 
 #if defined(ABGR4444)
@@ -389,10 +392,10 @@ static void render_checkered(void)
    }
 
    line = ps2->coreTexture->Mem;
-   for (unsigned y = 0; y < 240; y++, line += stride)
+   for (unsigned y = 0; y < BUFFER_HEIGHT; y++, line += stride)
    {
       unsigned index_y = ((y - y_coord) >> 4) & 1;
-      for (unsigned x = 0; x < 320; x++)
+      for (unsigned x = 0; x < BUFFER_WIDTH; x++)
       {
          unsigned index_x = ((x - x_coord) >> 4) & 1;
          line[x] = (index_y ^ index_x) ? 0 : 2;
@@ -407,10 +410,10 @@ static void render_checkered(void)
 #else
 
    uint32_t *line = buf;
-   for (unsigned y = 0; y < 240; y++, line += stride)
+   for (unsigned y = 0; y < BUFFER_HEIGHT; y++, line += stride)
    {
       unsigned index_y = ((y - y_coord) >> 4) & 1;
-      for (unsigned x = 0; x < 320; x++)
+      for (unsigned x = 0; x < BUFFER_WIDTH; x++)
       {
          unsigned index_x = ((x - x_coord) >> 4) & 1;
          line[x] = (index_y ^ index_x) ? color_r : color_g;
@@ -423,7 +426,7 @@ static void render_checkered(void)
 
 #endif
    
-   video_cb(buf, 320, 240, stride << 2);
+   video_cb(buf, BUFFER_WIDTH, BUFFER_HEIGHT, stride << 2);
 }
 
 static void check_variables(void)
