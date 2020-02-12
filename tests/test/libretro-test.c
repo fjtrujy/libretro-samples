@@ -18,8 +18,10 @@ typedef uint16_t pixel_fmt_t;
 typedef uint32_t pixel_fmt_t;
 #endif
 
-#define BUFFER_WIDTH 320
-#define BUFFER_HEIGHT 240
+// #define BUFFER_WIDTH 320
+// #define BUFFER_HEIGHT 240
+#define BUFFER_WIDTH 672
+#define BUFFER_HEIGHT 432
 
 static pixel_fmt_t *frame_buf;
 static struct retro_log_callback logging;
@@ -29,7 +31,7 @@ static float last_aspect;
 static float last_sample_rate;
 static bool analog_mouse = true;
 static bool analog_mouse_relative = false;
-static bool enable_audio = true;
+static bool enable_audio = false;
 
 static void fallback_log(enum retro_log_level level, const char *fmt, ...)
 {
@@ -167,12 +169,12 @@ void retro_set_environment(retro_environment_t cb)
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
 {
-   audio_cb = cb;
+   // audio_cb = cb;
 }
 
 void retro_set_audio_sample_batch(retro_audio_sample_batch_t cb)
 {
-   audio_batch_cb = cb;
+   // audio_batch_cb = cb;
 }
 
 void retro_set_input_poll(retro_input_poll_t cb)
@@ -516,8 +518,8 @@ void retro_run(void)
 {
    update_input();
    render_checkered();
-   if (!use_audio_cb)
-      audio_callback();
+   // if (!use_audio_cb)
+      // audio_callback();
 
    bool updated = false;
    if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
@@ -563,8 +565,8 @@ bool retro_load_game(const struct retro_game_info *info)
    else
       log_cb(RETRO_LOG_INFO, "Rumble environment not supported.\n");
 
-   struct retro_audio_callback audio_cb = { audio_callback, audio_set_state };
-   use_audio_cb = environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_CALLBACK, &audio_cb);
+   // struct retro_audio_callback audio_cb = { audio_callback, audio_set_state };
+   // use_audio_cb = environ_cb(RETRO_ENVIRONMENT_SET_AUDIO_CALLBACK, &audio_cb);
 
    check_variables();
 
