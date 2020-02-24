@@ -82,6 +82,7 @@ void renderchr(pixel_t col, int chr, int x, int y);
 void renderstr(pixel_t col, const char * str, int x, int y);
 unsigned long crc32_calc(unsigned char *ptr, unsigned cnt, unsigned long crc);
 
+#if !defined(RA_GET_TIME)
 #if defined(__unix__)
 #include <time.h>
 uint64_t cpu_features_get_time_usec()
@@ -109,6 +110,7 @@ uint64_t cpu_features_get_time_usec()
    last += 1000000;
    return last;
 }
+#endif
 #endif
 
 static void test1a(void)
