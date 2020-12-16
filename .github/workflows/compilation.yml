@@ -9,28 +9,34 @@ on:
 jobs:
   build-ps2:
     runs-on: ubuntu-latest
-    container: ps2dev/ps2dev:latest
+    strategy:
+      matrix:
+       include:
+         - docker: ps2dev/ps2dev:latest
+           platform: "ps2"
+         - docker: ps2dev/ps2dev:experimental
+           platform: "ps2_1"
+    container: ${{ matrix.docker }}
     steps:
-    - uses: actions/checkout@v2
-
     - name: Install dependencies
       run: |
-        apk add build-base
+        apk add build-base git
+
+    - uses: actions/checkout@v2
 
     - name: Get Information Variables
       id: core
       run: |
         echo "::set-output name=info::$(echo test)"
-        echo "::set-output name=platform::$(echo ps2)"
         echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
 
     - name: Compile test core
       run: |
-        cd tests/test && make platform=${{ steps.core.outputs.platform }} clean all
+        cd tests/test && make platform=${{ matrix.platform }} clean all
 
     - name: Upload artifacts
       if: ${{ success() }}
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ steps.core.outputs.info }}_libretro_${{ steps.core.outputs.platform }}-${{ steps.core.outputs.sha8 }}
-        path: tests/test/${{ steps.core.outputs.info }}_libretro_${{ steps.core.outputs.platform }}.a
+        name: ${{ steps.core.outputs.info }}_libretro_${{ matrix.platform }}-${{ steps.core.outputs.sha8 }}
+        path: test/test/${{ steps.core.outputs.info }}_libretro_${{ matrix.platform }}.a
