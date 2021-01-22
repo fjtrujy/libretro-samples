@@ -338,7 +338,7 @@ static void render_checkered(void)
       stride = 320;
    }
 
-#if defined(ABGR4444)
+#if defined(ABGR8888)
    uint32_t color_b = 0xff <<  16;
    uint32_t color_g = 0xff <<  8;
    uint32_t color_r = 0xff;
@@ -364,7 +364,7 @@ static void render_checkered(void)
 		return;
 	}
 
-   if (ps2->clearTexture || !ps2->coreTexture->Clut || !ps2->coreTexture->Mem ) {
+   if (!ps2->coreTexture->Clut || !ps2->coreTexture->Mem ) {
       /* If it is empty we need to create it */
       size_t mem_size, clut_size;
       uint32_t *palette;

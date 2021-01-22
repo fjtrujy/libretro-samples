@@ -95,13 +95,6 @@ else ifeq ($(platform), emscripten)
    TARGET := $(TARGET_NAME)_libretro_emscripten.bc
    fpic := -fPIC
    SHARED := -shared -Wl,--version-script=link.T -Wl,--no-undefined
-else ifeq ($(platform), ps2)
-   TARGET := $(TARGET_NAME)_ps2.a
-   CC = ee-gcc
-   AR = ee-ar
-   CFLAGS += -Wall -DPS2 -DABGR4444 -DRENDER_GSKIT_PS2 -fsingle-precision-constant
-   CFLAGS += -I$(PS2SDK)/ee/include -I$(PS2SDK)/common/include -I$(PS2DEV)/gsKit/include
-	STATIC_LINKING = 1
 else ifeq ($(platform), vita)
    TARGET := $(TARGET_NAME)_libretro_vita.a
    CC = arm-vita-eabi-gcc
@@ -139,19 +132,11 @@ else ifeq ($(platform), psp1)
    STATIC_LINKING = 1
 else ifeq ($(platform), ps2)
    TARGET := $(TARGET_NAME)_libretro_ps2.a
-   CC = ee-gcc
-   CXX = ee-g++
-   AR = ee-ar
-   CFLAGS += -DPS2 -G0 -D__sun
-   CXXFLAGS += -DPS2 -G0 -D__sun
-   STATIC_LINKING = 1
-else ifeq ($(platform), ps2_1)
-   TARGET := $(TARGET_NAME)_libretro_ps2.a
    CC = mips64r5900el-ps2-elf-gcc
    CXX = mips64r5900el-ps2-elf-g++
    AR = mips64r5900el-ps2-elf-ar
-   CFLAGS += -DPS2 -G0 -D__sun
-   CXXFLAGS += -DPS2 -G0 -D__sun
+   CFLAGS += -DPS2 -D_EE -G0 -DBGR8888 -DRENDER_GSKIT_PS2 -fsingle-precision-constant
+   CFLAGS += -I$(PS2SDK)/ee/include -I$(PS2SDK)/common/include -I$(PS2DEV)/gsKit/include
    STATIC_LINKING = 1
 else ifeq ($(platform), psl1ght)
    EXT=a
